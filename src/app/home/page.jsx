@@ -16,7 +16,7 @@ export default function Home() {
                     height={300}
                 />
                 <h1 className={styles.title}> André Lucca Santos </h1>
-                <h2 className={styles.subtitle}>Turma: <span className={styles.text}>2TDS3</span></h2>
+                <h2 className={styles.subtitle}>Turma: <span className={styles.text}>3TDS1</span></h2>
                 <p className={styles.description}>Front-end | Atividade avaliativa</p>
                 <p className={styles.secondDescription}>Criei uma API sobre proprietarios e seus imoveis</p>
                 <p className={styles.thirdDescription}>Thiago | Marcelo 👨‍🏫</p>

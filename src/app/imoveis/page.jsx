@@ -9,7 +9,7 @@ import styles from "./Imovel.module.css";
 
 const HEADERS = { "x-api-key": process.env.NEXT_PUBLIC_API_KEY };
 
-export default function Alunos() {
+export default function Imoveis() {
     const [data, setData] = useState({
         imoveis: [],
         loading: true,
@@ -26,11 +26,6 @@ export default function Alunos() {
 
     useEffect(() => {
         const fetchImoveis = async () => {
-            if (cached.length > 0) {
-                setData({ imoveis: cached, loading: false, current: 1, pageSize: 5 });
-                return;
-            }
-
             try {
                 const { data: imoveis } = await axios.get(
                     `${process.env.NEXT_PUBLIC_API_URL}/imoveis`,
@@ -38,7 +33,6 @@ export default function Alunos() {
                         headers: HEADERS,
                     }
                 );
-                setSessionStorage("imoveisData", imoveis);
                 setData({ imoveis, loading: false, current: 1, pageSize: 5 });
             } catch {
                 toast.error("Erro ao carregar imóveis");
@@ -51,13 +45,6 @@ export default function Alunos() {
 
     const openModal = async (imovel) => {
         setModalInfo({ visible: true, imovel, avaliacao: null, loading: true });
-
-        const cacheKey = `avaliacao_${imovel.id}`;
-        const cached = getSessionStorage(cacheKey, null);
-        if (cached) {
-            setModalInfo((m) => ({ ...m, avaliacao: cached, loading: false }));
-            return;
-        }
 
         try {
             const { data: avaliacao } = await axios.get(
@@ -95,82 +82,42 @@ export default function Alunos() {
 
             {data.loading ? (
                 <Image
-                    src="/images/loading.gif"
+                    src="/image/loading.gif"
                     width={300}
                     height={200}
                     alt="Loading"
                 />
             ) : (
                 <div className={styles.cardsContainer}>
-                    {paginatedAlunos().map((aluno) => (
+                    {paginatedImoveis().map((imovel) => (
                         <Card
-                            key={aluno.id}
+                            key={imovel.id}
                             className={styles.card}
                             hoverable
-                            onClick={() => openModal(aluno)}
+                            onClick={() => Number.isInteger(imovel.id) && openModal(imovel)}
                             cover={
                                 <Image
-                                    alt={aluno.name_estudante}
-                                    src={aluno.photo ? aluno.photo : "/images/220.svg"}
+                                    alt={imovel.nome_imovel || "Imagem do imóvel"}
+                                    src={
+                                        typeof imovel.photo === "string" && imovel.photo.trim() !== ""
+                                            ? imovel.photo.startsWith("/")
+                                                ? imovel.photo
+                                                : "/" + imovel.photo
+                                            : "/image/1747930702530-images.jpg"
+                                    }
                                     width={220}
                                     height={220}
                                 />
                             }
                         >
                             <Card.Meta
-                                title={aluno.name_estudante}
+                                title={imovel.nome_imovel}
                             />
                         </Card>
                     ))}
                 </div>
             )}
 
-            <Modal
-                title={`Avaliação de ${modalInfo.aluno?.name_estudante}`}
-                open={modalInfo.visible}
-                onCancel={() =>
-                    setModalInfo({
-                        visible: false,
-                        aluno: null,
-                        avaliacao: null,
-                        loading: false,
-                    })
-                }
-                onOk={() =>
-                    setModalInfo({
-                        visible: false,
-                        aluno: null,
-                        avaliacao: null,
-                        loading: false,
-                    })
-                }
-                width={600}
-            >
-                {modalInfo.loading ? (
-                    <Skeleton active />
-                ) : modalInfo.avaliacao ? (
-                    <div className={styles.avaliacaoInfo}>
-                        <p>
-                            <span className={styles.label}>Nota:</span>{" "}
-                            {modalInfo.avaliacao.nota}
-                        </p>
-                        <p>
-                            <span className={styles.label}>Professor:</span>{" "}
-                            {modalInfo.avaliacao.professor}
-                        </p>
-                        <p>
-                            <span className={styles.label}>Matéria:</span>{" "}
-                            {modalInfo.avaliacao.materia}
-                        </p>
-                        <p>
-                            <span className={styles.label}>Sala:</span>{" "}
-                            {modalInfo.avaliacao.sala}
-                        </p>
-                    </div>
-                ) : (
-                    <p style={{ textAlign: "center" }}>Avaliação não encontrada.</p>
-                )}
-            </Modal>
 
             <ToastContainer position="top-right" autoClose={4500} />
         </div>
